@@ -1,8 +1,8 @@
 ## Interface: 11200
 ## Title: Raid Organizer
 ## Notes: User friendly raid organizer
-## Author: Tylka (based on Progman work)
-## Version: 0.9.913
+## Author: Eriadla (Based on work from Tylka)
+## Version: 0.9.920
 ## X-Category: Raid
 
 ## OptionalDeps: Ace2 DewdropLib
