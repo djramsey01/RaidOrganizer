@@ -27,42 +27,31 @@ local newAttrib = {true, true, true, true, true, true,true, true, true}
 local classTab = {}
 
 local faction = UnitFactionGroup("player")
-if faction == "Alliance" then
-	classTab = {{"PRIEST","DRUID","PALADIN"},
-	{"WARRIOR","DRUID"},
-	{"WARRIOR","ROGUE","MAGE"},
-	{"MAGE","PRIEST","WARLOCK","ROGUE","HUNTER", "DRUID"},
+	classTab = {{"PRIEST","DRUID","PALADIN","SHAMAN"}, --Heal
+	{"WARRIOR","DRUID", "PALADIN", "SHAMAN"}, --Tank
+	{"MAGE", "PRIEST", "WARLOCK", "ROGUE", "HUNTER", "DRUID", "PALADIN", "SHAMAN", "WARRIOR"}, --Raid Assignment
+	{"MAGE", "PRIEST","WARLOCK", "DRUID"}, -- CC
 	{"WARLOCK"},
 	{"MAGE"},
 	{"PRIEST"},
 	{"DRUID"},
-	{"MAGE","PRIEST","WARLOCK","ROGUE","HUNTER", "DRUID", "PALADIN", "WARRIOR"},
-	{"MAGE","PRIEST","WARLOCK","ROGUE","HUNTER", "DRUID", "PALADIN", "WARRIOR"},
-	{"MAGE","PRIEST","WARLOCK","ROGUE","HUNTER", "DRUID", "PALADIN", "WARRIOR"}}
-else
-	classTab = {{"PRIEST","DRUID","SHAMAN"},
-	{"WARRIOR","DRUID"},
-	{"WARRIOR","ROGUE","MAGE"},
-	{"MAGE","PRIEST","WARLOCK","ROGUE","HUNTER", "DRUID"},
-	{"WARLOCK"},
-	{"MAGE"},
-	{"PRIEST"},
-	{"DRUID"},
-	{"MAGE","PRIEST","WARLOCK","ROGUE","HUNTER", "DRUID", "SHAMAN", "WARRIOR"},
-	{"MAGE","PRIEST","WARLOCK","ROGUE","HUNTER", "DRUID", "SHAMAN", "WARRIOR"},
-	{"MAGE","PRIEST","WARLOCK","ROGUE","HUNTER", "DRUID", "SHAMAN", "WARRIOR"}}
-end
+	{"MAGE", "PRIEST", "WARLOCK", "ROGUE", "HUNTER", "DRUID", "PALADIN", "SHAMAN", "WARRIOR"},
+	{"MAGE", "PRIEST", "WARLOCK", "ROGUE", "HUNTER", "DRUID", "PALADIN", "SHAMAN", "WARRIOR"},
+	{"MAGE", "PRIEST", "WARLOCK", "ROGUE", "HUNTER", "DRUID", "PALADIN", "SHAMAN", "WARRIOR"}}
 
-local TOTAL_TAB_NB = 11
-local SYNC_TAB_NB = 9
+
+
+
 local HEAL_TAB_INDEX = 1
 local TANK_TAB_INDEX = 2
 local BUFF_MAGE_TAB_INDEX = 6
 local BUFF_PRIEST_TAB_INDEX = 7
 local BUFF_DRUID_TAB_INDEX = 8
 local RAID_PLACEMENT_TAB_INDEX = 9
+local SYNC_TAB_NB = 9
 local RAID_FILL_TAB_INDEX = 10
 local ROLE_TAB_INDEX = 11
+local TOTAL_TAB_NB = 11
 
 local IsPlayerInRaid = false
 
@@ -640,17 +629,17 @@ RaidOrganizer:RegisterDefaults('account', {
 	}
 })
 
-RaidOrganizer.SLOT_PER_GROUP_PER_TAB = {{8, 8, 8, 8, 8, 8, 0, 0, 0}, 
-										{3, 3, 3, 3, 3, 3, 3, 3, 0},
-										{5, 5, 5, 5, 5, 5, 5, 5, 0},
-										{2, 2, 2, 2, 2, 2, 2, 2, 0},
-										{1, 1, 1, 1, 1, 1, 0, 0, 0},
-										{1, 1, 1, 1, 1, 1, 1, 1, 0},
-										{1, 1, 1, 1, 1, 1, 1, 1, 0},
-										{1, 1, 1, 1, 1, 1, 1, 1, 0},
-										{30, 30, 0, 0, 0, 0, 0, 0, 0},
-										{5, 5, 5, 5, 5, 5, 5, 5, 0},
-										{8, 18, 18, 18, 0, 0, 0, 0, 0}
+RaidOrganizer.SLOT_PER_GROUP_PER_TAB = {{8, 8, 8, 8, 8, 8, 0, 0, 0}, --Heals
+										{3, 3, 3, 3, 3, 3, 3, 3, 0}, --Tanks
+										{5, 5, 5, 5, 5, 5, 5, 5, 0}, --Interrupts
+										{2, 2, 2, 2, 2, 2, 2, 2, 0}, --CCs
+										{1, 1, 1, 1, 1, 1, 0, 0, 0}, --Curses
+										{1, 1, 1, 1, 1, 1, 1, 1, 0}, --Intel
+										{1, 1, 1, 1, 1, 1, 1, 1, 0}, --Fort
+										{1, 1, 1, 1, 1, 1, 1, 1, 0}, --MOTW
+										{30, 30, 0, 0, 0, 0, 0, 0, 0}, --Placements
+										{5, 5, 5, 5, 5, 5, 5, 5, 0}, --Raid Autofills
+										{8, 18, 18, 18, 0, 0, 0, 0, 0} --Roles
 										}
 
 RaidOrganizer.b_versionQuery = false
@@ -774,7 +763,7 @@ function RaidOrganizer:OnInitialize() -- {{{
 	RaidOrganizer_Tabs = {
 			{ "Heal", "Interface\\Icons\\Spell_Holy_Heal"},
 			{ "Tank", "Interface\\Icons\\INV_Shield_17" },
-			{ "Kick", "Interface\\Icons\\Ability_Kick" },
+			{ "Raid Assignment", "Interface\\Icons\\Ability_Kick" },  --Was Counterspell/Kick
 			{ "Crowd Control", "Interface\\Icons\\spell_nature_polymorph" },
 			{ "Curses", "Interface\\Icons\\Spell_Shadow_ChillTouch" },
 			{ "Intel Buff", "Interface\\Icons\\spell_holy_magicalsentry" },
@@ -1228,7 +1217,7 @@ function RaidOrganizer:UpdateLayoutSize()
 				getglobal("RaidOrganizerDialogEinteilungStatsClass" .. i):SetText("")
 			end
 		end
-		local autoSizeStatsLUT = {37, 37, 57, 57, 75, 75, 94, 94}
+		local autoSizeStatsLUT = {100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
 		RaidOrganizerDialogEinteilungStats:SetHeight(autoSizeStatsLUT[table.getn(classTab[RaidOrganizerDialog.selectedTab])])
 	end
 end
@@ -1436,7 +1425,7 @@ end -- }}}
 
 function RaidOrganizer:BuildMessages() -- {{{
     local messages = {}
-    table.insert(messages, L["HEALARRANGEMENT" .. tostring(RaidOrganizerDialog.selectedTab)]..":")
+    table.insert(messages, "--- "..L["HEALARRANGEMENT" .. tostring(RaidOrganizerDialog.selectedTab)].." ---")
     for i=1, MAX_GROUP_NB do 
 		if self.SLOT_PER_GROUP_PER_TAB[RaidOrganizerDialog.selectedTab][i] > 0 then
 			local header = getglobal("RaidOrganizerDialogEinteilungHealGroup"..i.."Label"):GetText()
@@ -1457,7 +1446,7 @@ function RaidOrganizer:BuildMessages() -- {{{
     end
     table.insert(messages, L["REMAINS"]..": "..action)
     -- }}}
-    table.insert(messages, L["MSG_HEAL_FOR_ARRANGEMENT"])
+    --table.insert(messages, L["MSG_HEAL_FOR_ARRANGEMENT"])
     return messages
 end -- }}}
 
@@ -1561,7 +1550,7 @@ function RaidOrganizer:RaiderOnDragStop() -- {{{
 					end
 				end
 				if RaidOrganizerDialog.selectedTab == ROLE_TAB_INDEX then
-					local classLUT ={["WARRIOR"] = "TANK", ["DRUID"] = "HEALER",	["PRIEST"] = "HEALER", ["SHAMAN"] = "HEALER", ["PRIEST"] = "HEALER", ["PALADIN"] = "HEALER", ["ROGUE"] = "MELEE", ["MAGE"] = "CASTER", ["WARLOCK"] = "CASTER", ["HUNTER"] = "MELEE"}
+					local classLUT ={["WARRIOR"] = "TANK", ["DRUID"] = "HEALER", ["PRIEST"] = "HEALER", ["SHAMAN"] = "HEALER", ["PRIEST"] = "HEALER", ["PALADIN"] = "HEALER", ["ROGUE"] = "MELEE", ["MAGE"] = "CASTER", ["WARLOCK"] = "CASTER", ["HUNTER"] = "MELEE"}
 					local rolePerGroup = {[1] = "TANK", [2] = "HEALER", [3] = "MELEE", [4] = "CASTER"}
 					local _,engClass = UnitClass(self:GetUnitByName(name))
 					if (group == nil) or classLUT[engClass] == rolePerGroup[group] then RO_HybrideSpec[name] = nil
